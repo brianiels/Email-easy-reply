@@ -1,3 +1,4 @@
+npm install react lucide-react;
 import React, { useState } from 'react';
 import { Send, Copy, CheckCircle, Sparkles, Mail, MessageSquare, Palette } from 'lucide-react';
 
