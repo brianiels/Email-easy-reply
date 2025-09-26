@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmailCraft - AI Email Enhancement</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.9);
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .main-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 
+                0 32px 64px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(255,255,255,0.5);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #06b6d4, #8b5cf6);
+            border-radius: 24px 24px 0 0;
+        }
+        
+        .api-setup-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .api-setup-card h3 {
+            color: #1e40af;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .api-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .api-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .api-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .api-connect-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .api-connect-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .api-connect-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+        
+        .status-indicator.connected {
+            background: #10b981;
+        }
+        
+        .demo-notice {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            color: #d97706;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+        
+        .optional-badge {
+            background: #e5e7eb;
+            color: #6b7280;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .textarea, .input, .select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.8);
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+        
+        .textarea {
+            min-height: 120px;
+            line-height: 1.6;
+        }
+        
+        .textarea:focus, .input:focus, .select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background: white;
+            box-shadow: 
+                0 0 0 4px rgba(79, 70, 229, 0.1),
+                0 8px 24px rgba(79, 70, 229, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .tone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+        
+        .tone-option {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .tone-input {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .tone-card {
+            padding: 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.6);
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tone-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(139, 92, 246, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tone-input:checked + .tone-card {
+            border-color: #4f46e5;
+            background: rgba(79, 70, 229, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.15);
+        }
+        
+        .tone-input:checked + .tone-card::before {
+            opacity: 1;
+        }
+        
+        .tone-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+        }
+        
+        .tone-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tone-desc {
+            font-size: 0.85rem;
+            color: #6b7280;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 1.25rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.4);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .result-card {
+            display: none;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            position: relative;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .copy-btn, .regenerate-btn {
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        .copy-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .copy-btn.copied {
+            background: #6366f1;
+        }
+        
+        .regenerate-btn {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .regenerate-btn:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+        
+        .result-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            color: #374151;
+            white-space: pre-wrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-circle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .floating-circle:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .floating-circle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 30%;
+            right: 30%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .github-deploy-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #059669;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .github-deploy-info h4 {
+            margin-bottom: 0.5rem;
+            color: #047857;
+        }
+        
+        .github-deploy-info ul {
+            margin-left: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .main-card {
+                padding: 2rem;
+            }
+            
+            .tone-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-input-group {
+                flex-direction: column;
+            }
+            
+            .api-input {
+                min-width: unset;
+            }
+            
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .result-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+            
+            .copy-btn, .regenerate-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+    
+    <div class="container">
+        <div class="hero">
+            <h1>EmailCraft</h1>
+            <p>Transform your thoughts into perfectly crafted emails with AI assistance</p>
+        </div>
+        
+        <div class="main-card">
+            <div class="github-deploy-info">
+                <h4>🚀 Ready for GitHub Pages Deployment</h4>
+                <p>This app is fully functional and ready to deploy! It works with or without API keys:</p>
+                <ul>
+                    <li><strong>With API:</strong> Enter your Claude API key below for real AI enhancement</li>
+                    <li><strong>Without API:</strong> Uses intelligent templates for demonstration</li>
+                    <li><strong>GitHub Pages:</strong> Works as a static site - no server required!</li>
+                </ul>
+            </div>
+            
+            <div class="api-setup-card">
+                <h3>🔑 Claude API Configuration</h3>
+                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+                    Optional: Enter your Claude API key for real AI enhancement. Leave blank to use demo mode.
+                </p>
+                <div class="api-input-group">
+                    <input 
+                        type="password" 
+                        id="apiKey" 
+                        class="api-input" 
+                        placeholder="sk-ant-api03-... (Your Claude API Key)"
+                    >
+                    <button id="connectApi" class="api-connect-btn">Connect API</button>
+                </div>
+                <div class="api-status">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span id="statusText">Not connected - using demo mode</span>
+                </div>
+            </div>
+            
+            <form id="emailForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label class="input-label">
+                            Original Email <span class="optional-badge">optional</span>
+                        </label>
+                        <textarea 
+                            class="textarea" 
+                            id="originalEmail" 
+                            placeholder="Paste the email you're responding to here (optional)..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">
+                            Your Thoughts <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            class="textarea" 
+                            id="rawThoughts" 
+                            placeholder="Briefly describe what you want to communicate... e.g., 'Need to reschedule meeting because of conflict, suggest next week instead'"
+                            rows="3"
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">
+                            Email Tone <span class="required">*</span>
+                        </label>
+                        <div class="tone-grid">
+                            <label class="tone-option">
+                                <input type="radio" name="tone" value="professional" class="tone-input" required>
+                                <div class="tone-card">
+                                    <div class="tone-title">Professional</div>
+                                    <div class="tone-desc">Formal and business-appropriate</div>
+                                </div>
+                            </label>
+                            
+                            <label class="tone-option">
+                                <input type="radio" name="tone" value="friendly" class="tone-input">
+                                <div class="tone-card">
+                                    <div class="tone-title">Friendly</div>
+                                    <div class="tone-desc">Warm and approachable</div>
+                                </div>
+                            </label>
+                            
+                            <label class="tone-option">
+                                <input type="radio" name="tone" value="concise" class="tone-input">
+                                <div class="tone-card">
+                                    <div class="tone-title">Concise</div>
+                                    <div class="tone-desc">Brief and to the point</div>
+                                </div>
+                            </label>
+                            
+                            <label class="tone-option">
+                                <input type="radio" name="tone" value="formal" class="tone-input">
+                                <div class="tone-card">
+                                    <div class="tone-title">Formal</div>
+                                    <div class="tone-desc">Traditional business language</div>
+                                </div>
+                            </label>
+                            
+                            <label class="tone-option">
+                                <input type="radio" name="tone" value="persuasive" class="tone-input">
+                                <div class="tone-card">
+                                    <div class="tone-title">Persuasive</div>
+                                    <div class="tone-desc">Compelling and convincing</div>
+                                </div>
+                            </label>
+                            
+                            <label class="tone-option">
+                                <input type="radio" name="tone" value="apologetic" class="tone-input">
+                                <div class="tone-card">
+                                    <div class="tone-title">Apologetic</div>
+                                    <div class="tone-desc">Acknowledging fault gracefully</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="generate-btn" id="generateBtn">
+                    <span class="btn-text">✨ Generate Perfect Email</span>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <span>Crafting your email...</span>
+                    </div>
+                </button>
+            </form>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <div class="result-card" id="resultCard">
+                <div class="result-header">
+                    <h3 class="result-title">Your Enhanced Email</h3>
+                    <div class="result-actions">
+                        <button class="regenerate-btn" id="regenerateBtn">
+                            🔄 Regenerate
+                        </button>
+                        <button class="copy-btn" id="copyBtn">
+                            📋 Copy to Clipboard
+                        </button>
+                    </div>
+                </div>
+                <div class="result-content" id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let apiKey = null;
+        let isApiConnected = false;
+        let lastFormData = null;
+
+        // Demo email templates for fallback
+        const emailTemplates = {
+            professional: (thoughts, original) => `Subject: ${getSubjectFromThoughts(thoughts)}
+
+Dear [Recipient],
+
+I hope this email finds you well.
+
+${original ? 'Thank you for your email. ' : ''}${thoughts.charAt(0).toUpperCase() + thoughts.slice(1).replace(/\.$/, '')}.
+
+I would appreciate your understanding and look forward to your response.
+
+Best regards,
+[Your Name]`,
+
+            friendly: (thoughts, original) => `Subject: ${getSubjectFromThoughts(thoughts)}
+
+Hi there!
+
+${original ? 'Thanks for reaching out! ' : ''}Hope you're having a great day. ${thoughts.charAt(0).toUpperCase() + thoughts.slice(1).replace(/\.$/, '')}. 
+
+Let me know what works best for you!
+
+Cheers,
+[Your Name]`,
+
+            concise: (thoughts, original) => `Subject: ${getSubjectFromThoughts(thoughts)}
+
+${original ? 'Re: Your email\n\n' : ''}${thoughts.charAt(0).toUpperCase() + thoughts.slice(1).replace(/\.$/, '')}.
+
+Thanks,
+[Your Name]`,
+
+            formal: (thoughts, original) => `Subject: ${getSubjectFromThoughts(thoughts)}
+
+Dear [Recipient Name],
+
+${original ? 'I am writing in response to your correspondence dated [date]. ' : ''}I am writing to inform you that ${thoughts.toLowerCase().replace(/\.$/, '')}.
+
+I would be grateful for your consideration in this matter and await your favorable response.
+
+Yours sincerely,
+[Your Name]
+[Your Title]`,
+
+            persuasive: (thoughts, original) => `Subject: ${getSubjectFromThoughts(thoughts)}
+
+Dear [Recipient],
+
+${original ? 'I\'ve carefully reviewed your message and ' : ''}I wanted to reach out regarding an important matter. ${thoughts.charAt(0).toUpperCase() + thoughts.slice(1).replace(/\.$/, '')}.
+
+This adjustment would be mutually beneficial as it allows us both to be fully prepared and engaged. I believe this change will lead to a much more productive outcome.
+
+I'm confident you'll agree this is the best path forward. Looking forward to your positive response.
+
+Best regards,
+[Your Name]`,
+
+            apologetic: (thoughts, original) => `Subject: ${getSubjectFromThoughts(thoughts)}
+
+Dear [Recipient],
+
+I hope you'll accept my sincere apologies for any inconvenience this may cause. ${original ? 'After reviewing your email, ' : ''}I must inform you that ${thoughts.toLowerCase().replace(/\.$/, '')}.
+
+I understand this may disrupt your schedule, and I take full responsibility for this situation. I'm committed to making this right and ensuring it doesn't happen again.
+
+Thank you for your patience and understanding during this time.
+
+With sincere apologies,
+[Your Name]`
+        };
+
+        function getSubjectFromThoughts(thoughts) {
+            if (thoughts.toLowerCase().includes('meeting')) return 'Meeting Update';
+            if (thoughts.toLowerCase().includes('deadline')) return 'Deadline Notice';
+            if (thoughts.toLowerCase().includes('project')) return 'Project Update';
+            if (thoughts.toLowerCase().includes('schedule')) return 'Schedule Change';
+            if (thoughts.toLowerCase().includes('question')) return 'Quick Question';
+            return 'Important Update';
+        }
+
+        // API Connection Management
+        document.getElementById('connectApi').addEventListener('click', function() {
+            const keyInput = document.getElementById('apiKey');
+            const key = keyInput.value.trim();
+            
+            if (!key) {
+                updateApiStatus(false, 'Please enter an API key');
+                return;
+            }
+            
+            if (!key.startsWith('sk-ant-')) {
+                updateApiStatus(false, 'Invalid API key format');
+                return;
+            }
+            
+            // In a real implementation, you would validate the API key
+            // For this demo, we'll just check the format
+            apiKey = key;
+            isApiConnected = true;
+            updateApiStatus(true, 'API connected successfully');
+            
+            // Clear the input for security
+            keyInput.value = '';
+        });
+
+        function updateApiStatus(connected, message) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            if (connected) {
+                indicator.classList.add('connected');
+                statusText.textContent = message;
+                isApiConnected = true;
+            } else {
+                indicator.classList.remove('connected');
+                statusText.textContent = message;
+                isApiConnected = false;
+            }
+        }
+
+        // Email Generation using Claude API or Templates
+        async function generateEmail(rawThoughts, originalEmail, tone) {
+            if (isApiConnected && apiKey) {
+                return await generateWithClaudeAPI(rawThoughts, originalEmail, tone);
+            } else {
+                return generateWithTemplate(rawThoughts, originalEmail, tone);
+            }
+        }
+
+        async function generateWithClaudeAPI(rawThoughts, originalEmail, tone) {
+            try {
+                const prompt = createClaudePrompt(rawThoughts, originalEmail, tone);
+                
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-sonnet-20240229',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: prompt
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.content[0].text;
+            } catch (error) {
+                console.error('Claude API Error:', error);
+                // Fallback to template if API fails
+                showError('API call failed. Using template fallback.');
+                return generateWithTemplate(rawThoughts, originalEmail, tone);
+            }
+        }
+
+        function generateWithTemplate(rawThoughts, originalEmail, tone) {
+            return emailTemplates[tone](rawThoughts, originalEmail);
+        }
+
+        function createClaudePrompt(rawThoughts, originalEmail, tone) {
+            let prompt = `Please help me write a ${tone} email based on my thoughts. Here's what I want to communicate: "${rawThoughts}"`;
+            
+            if (originalEmail) {
+                prompt += `\n\nThis is in response to the following email:\n"${originalEmail}"`;
+            }
+            
+            prompt += `\n\nPlease write a complete, well-structured email with an appropriate subject line that matches the ${tone} tone. Make it natural and professional.`;
